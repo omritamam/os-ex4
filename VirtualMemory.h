@@ -1,11 +1,17 @@
 #pragma once
 
 #include "MemoryConstants.h"
+#include <math.h>
+#include <cstdio>
+#include "PhysicalMemory.h"
 
 /*
  * Initialize the virtual memory.
  */
-void VMinitialize();
+void VMinitialize(){
+
+}
+
 
 /* Reads a word from the given virtual address
  * and puts its content in *value.
@@ -15,14 +21,94 @@ void VMinitialize();
  * address for any reason)
  */
 int VMread(uint64_t virtualAddress, word_t* value){
-    auto offest = virtualAddress % PAGE_SIZE;
-    virtualAddress >> OFFSET_WIDTH;
-    auto p2 =
-    int* addr1 = 0;
-    PMread(0 + 5, &addr1); // first translation
-    PMread(addr1 * PAGE_SIZE + 1, &addr2); // second translation
-    PMwrite(addr2 * PAGE_SIZE + 6, value);
+
+
+
+    return 0;
+
 }
+
+
+int simpleFindNewFrame();
+
+uint64_t translateAdress(uint64_t virtualAddress){
+    int chunks[TABLES_DEPTH + 1];
+    for (int layer = TABLES_DEPTH ; layer >= 0; layer--){
+        auto chunk = virtualAddress % PAGE_SIZE;
+        virtualAddress = virtualAddress >> OFFSET_WIDTH;
+        chunks[layer] = chunk;
+        printf("%d\n", chunks[layer]);
+    }
+    word_t nextTable;
+
+    virtualAddress >> OFFSET_WIDTH;
+    word_t currentTable = 0;
+    for (int layer = 0 ; layer < TABLES_DEPTH; layer++){
+        PMread(currentTable * PAGE_SIZE + chunks[layer], &nextTable);
+        if(nextTable == 0){
+            auto newFrame = simpleFindNewFrame();
+            PMwrite(currentTable * PAGE_SIZE + chunks[layer], newFrame);
+        }
+        currentTable = nextTable;
+    }
+    PMread(currentTable * PAGE_SIZE + chunks[TABLES_DEPTH], &nextTable);
+    return nextTable;
+
+}
+
+int DFS(int i);
+
+// start from frame 0
+int simpleFindNewFrame(){
+    //if availble - stop
+    //checkRight()
+    //c
+    // Mark the current node as visited and
+    // print it
+    return DFS(0);
+
+
+    return 0;
+}
+
+int DFS(int curFrame) {
+    int ind = 0;
+    for(ind = 0; ind < PAGE_SIZE; ind++)
+    {
+        word_t value;
+        PMread(curFrame*PAGE_SIZE+ind, &value);
+        if(value != 0)
+            break;
+    }
+    if (ind == PAGE_SIZE){
+        return curFrame;
+    }
+
+    // Recur for all the vertices adjacent
+    // to this vertex
+    int childInd;
+    for (childInd = 0; childInd != PAGE_SIZE; ++childInd){
+        word_t value;
+        PMread(curFrame*PAGE_SIZE+childInd, &value);
+        if(value != 0){
+            auto unusedFrame = DFS(value);
+            if (unusedFrame != 0){
+                return unusedFrame;
+            }
+        }
+    }
+    return 0;
+}
+//
+//int* splitAdress(uint64_t address) {
+//    int res[TABLES_DEPTH+1];
+//    for (int layer = TABLES_DEPTH ; layer == 0; layer--){
+//        auto chunk = address % PAGE_SIZE;
+//        address >> OFFSET_WIDTH;
+//        res[layer] = chunk;
+//    }
+//    return res*;
+//}
 
 /* Writes a word to the given virtual address.
  *
@@ -31,3 +117,7 @@ int VMread(uint64_t virtualAddress, word_t* value){
  * address for any reason)
  */
 int VMwrite(uint64_t virtualAddress, word_t value);
+
+int main(){
+    VMread(61601, reinterpret_cast<word_t *>(3));
+}
