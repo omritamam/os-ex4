@@ -29,9 +29,10 @@ int VMread(uint64_t virtualAddress, word_t* value){
 }
 
 
-int simpleFindNewFrame();
+int findNewFrame(uint64_t virtualAddress);
 
 uint64_t translateAdress(uint64_t virtualAddress){
+    uint64_t dest = virtualAddress>> OFFSET_WIDTH;
     int chunks[TABLES_DEPTH + 1];
     for (int layer = TABLES_DEPTH ; layer >= 0; layer--){
         auto chunk = virtualAddress % PAGE_SIZE;
@@ -46,7 +47,7 @@ uint64_t translateAdress(uint64_t virtualAddress){
     for (int layer = 0 ; layer < TABLES_DEPTH; layer++){
         PMread(currentTable * PAGE_SIZE + chunks[layer], &nextTable);
         if(nextTable == 0){
-            auto newFrame = simpleFindNewFrame();
+            auto newFrame = findNewFrame(dest);
             PMwrite(currentTable * PAGE_SIZE + chunks[layer], newFrame);
         }
         currentTable = nextTable;
@@ -55,20 +56,44 @@ uint64_t translateAdress(uint64_t virtualAddress){
     return nextTable;
 
 }
-
+struct PageInfo{
+    u_int64_t pageNum;
+    int frameNum;
+    
+};
 int DFS(int i);
 
-// start from frame 0
-int simpleFindNewFrame(){
-    //if availble - stop
-    //checkRight()
-    //c
-    // Mark the current node as visited and
-    // print it
+PageInfo choosePageToEvict();
+
+int findNewFrame(uint64_t virtualAddress){
+    //CHECK RAM NOT FULL
+    auto biggestFrame = biggestFrameNum();
+    if(biggestFrame != NUM_FRAMES - 1){
+        return biggestFrame + 1;
+    }
+    // RAM IS FULL
+    PageInfo chosenPage = choosePageToEvict(virtualAddress);
     return DFS(0);
 
 
     return 0;
+}
+
+PageInfo choosePageToEvict(PageInfo father, uint64_t destanation) {
+    int ind = 0;
+    for(ind = 0; ind < PAGE_SIZE; ind++)
+    {
+        word_t value;
+        PMread(father.frameNum*PAGE_SIZE+ind, &value);
+        if(value != 0)
+            break;
+    }
+    if (ind == PAGE_SIZE){
+        return father;
+    }
+    //THE frame has children
+
+    return PageInfo();
 }
 
 int DFS(int curFrame) {
