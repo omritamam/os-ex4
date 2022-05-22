@@ -63,7 +63,7 @@ struct PageInfo{
 };
 int DFS(int i);
 
-PageInfo choosePageToEvict();
+PageInfo choosePageToEvict(u_int64_t virtualAddress);
 
 int findNewFrame(uint64_t virtualAddress){
     //CHECK RAM NOT FULL
@@ -79,21 +79,32 @@ int findNewFrame(uint64_t virtualAddress){
     return 0;
 }
 
-PageInfo choosePageToEvict(PageInfo father, uint64_t destanation) {
-    int ind = 0;
+PageInfo choosePageToEvict(PageInfo curFrame, uint64_t destanation) {
+    int ind;
     for(ind = 0; ind < PAGE_SIZE; ind++)
     {
         word_t value;
-        PMread(father.frameNum*PAGE_SIZE+ind, &value);
+        PMread(curFrame.frameNum*PAGE_SIZE+ind, &value);
         if(value != 0)
             break;
     }
     if (ind == PAGE_SIZE){
-        return father;
+        return curFrame;
     }
     //THE frame has children
+    PageInfo bestResult = {};
+    for(ind = 0; ind < PAGE_SIZE; ind++){
+        word_t value;
+        PMread(curFrame.frameNum*PAGE_SIZE+ind, &value);
+        PageInfo curChild = { curFrame.pageNum<<OFFSET_WIDTH +ind, value };
+        auto curResult = choosePageToEvict(curChild, destanation);
+        if(//comparre 2 pages by cyclic destation){
+        )//update best result
+        }
+    return bestResult;
+    }
 
-    return PageInfo();
+
 }
 
 int DFS(int curFrame) {
