@@ -6,8 +6,10 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(.)
 
 add_executable(os_ex4
+        MemoryConstants2.h
         MemoryConstants.h
         PhysicalMemory.cpp
         PhysicalMemory.h
-        SimpleTest.cpp
+#        SimpleTest.cpp
+        test_example.cpp
         VirtualMemory.h)

@@ -41,7 +41,6 @@ void PMevict(uint64_t frameIndex, uint64_t evictedPageIndex) {
     if (RAM.empty()) {
         initialize();
     }
-
     assert(frameIndex < NUM_FRAMES);
     assert(evictedPageIndex < NUM_PAGES);
     assert(swapFile.find(evictedPageIndex) == swapFile.end());
