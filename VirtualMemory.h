@@ -25,7 +25,7 @@ void fillFrameWithZeros(int frameInd);
  * Initialize the virtual memory.
  */
 void VMinitialize(){
-
+    fillFrameWithZeros(0);
 }
 
 
@@ -37,12 +37,18 @@ void VMinitialize(){
  * address for any reason)
  */
 int VMread(uint64_t virtualAddress, word_t* value){
+    if(virtualAddress>=VIRTUAL_MEMORY_SIZE){
+        return 0;
+    }
     auto physicalAddress = translateAdress(virtualAddress);
     PMread(physicalAddress, value);
     return 1;
 
 }
 int VMwrite(uint64_t virtualAddress, word_t value){
+    if(virtualAddress>=VIRTUAL_MEMORY_SIZE){
+        return 0;
+    }
     auto physicalAddress = translateAdress(virtualAddress);
     uint64_t dest = virtualAddress>> OFFSET_WIDTH;
     PMwrite(physicalAddress, value);
